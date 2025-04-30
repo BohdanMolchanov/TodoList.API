@@ -3,7 +3,7 @@ using Npgsql;
 using TodoList.API.Data;
 using TodoList.API.Extensions;
 using TodoList.API.Models;
-using TodoList.API.Repositories.Requests;
+using TodoList.API.Services.TaskLists.Contracts.Requests;
 
 namespace TodoList.API.Repositories.TaskLists;
 
@@ -17,47 +17,47 @@ public class TaskListsRepository(DbContextOptions<TodoListContext> contextOption
         await context.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task ChangeTaskListAsync(Guid onBehalfOf, ChangeTaskListRequestModel request, CancellationToken cancellationToken)
+    public async Task ChangeTaskListAsync(ChangeRequest request, CancellationToken cancellationToken)
     {
         await using var context = new TodoListContext(contextOptions);
         await context.TaskLists.AsNoTracking()
             .Where(x => 
                 x.Id == request.TaskListId &&
-                (x.OwnerId == onBehalfOf ||
-                 x.UserLinks.Any(u => u.UserId == onBehalfOf)))
+                (x.OwnerId == request.OnBehalfOf ||
+                 x.UserLinks.Any(u => u.UserId == request.OnBehalfOf)))
             .ExecuteUpdateAsync(x => x
                     .SetProperty(p => p.Name, request.Name)
                     .SetProperty(p => p.LastUpdatedAt, DateTime.UtcNow), 
                 cancellationToken: cancellationToken);
     }
 
-    public async Task RemoveTaskListAsync(Guid id, Guid onBehalfOf, CancellationToken cancellationToken)
+    public async Task RemoveTaskListAsync(RemoveRequest request, CancellationToken cancellationToken)
     {
         await using var context = new TodoListContext(contextOptions);
         await context.TaskLists.AsNoTracking()
             .Where(x => 
-                x.Id == id && x.OwnerId == onBehalfOf)
+                x.Id == request.TaskListId && x.OwnerId == request.OnBehalfOf)
             .ExecuteUpdateAsync(x => x
                     .SetProperty(p => p.RemovedAt, DateTime.UtcNow)
                     .SetProperty(p => p.LastUpdatedAt, DateTime.UtcNow), 
                 cancellationToken: cancellationToken);
     }
 
-    public async Task<(List<TaskListModel> data, bool hasNext)> GetManyTaskListsAsync(Guid onBehalfOf, int skip, int limit, CancellationToken cancellationToken)
+    public async Task<(List<TaskListModel> data, bool hasNext)> GetManyTaskListsAsync(GetManyRequest request, CancellationToken cancellationToken)
     {
         await using var context = new TodoListContext(contextOptions);
         var entities = await context.TaskLists.AsNoTracking()
             .Where(x =>
-                (x.OwnerId == onBehalfOf ||
-                 x.UserLinks.Any(u => u.UserId == onBehalfOf)))
+                (x.OwnerId == request.OnBehalfOf ||
+                 x.UserLinks.Any(u => u.UserId == request.OnBehalfOf)))
             .OrderByDescending(x => x.CreatedAt)
-            .Skip(skip)
-            .Take(limit + 1)
+            .Skip(request.Skip)
+            .Take(request.Limit + 1)
             .ToListAsync(cancellationToken);
 
-        var result = entities.Take(limit).Select(x => x.ToModel()).ToList();
+        var result = entities.Take(request.Limit).Select(x => x.ToModel()).ToList();
         
-        return (result, entities.Count > limit);
+        return (result, entities.Count > request.Limit);
     }
 
     public async Task ShareTaskListAsync(Guid id, Guid userId, CancellationToken cancellationToken)

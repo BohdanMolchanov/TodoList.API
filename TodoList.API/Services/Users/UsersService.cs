@@ -1,7 +1,7 @@
 ﻿using TodoList.API.Models;
 using TodoList.API.Models.ServiceResponse;
 using TodoList.API.Repositories.Users;
-using TodoList.API.Services.Requests;
+using TodoList.API.Services.Users.Contracts.Requests;
 
 namespace TodoList.API.Services.Users;
 
@@ -33,5 +33,13 @@ public class UsersService(IUsersRepository repository) : IUsersService
         {
             Result = result
         };
+    }
+
+    public async Task<ServiceResponse<UserModel>> GetOneAsync(Guid onBehalfOf, CancellationToken cancellationToken)
+    {
+        var result = await repository.GetOneAsync(onBehalfOf, cancellationToken);
+        return result != null
+            ? new ServiceResponse<UserModel>() { Result = result }
+            : new ServiceResponse<UserModel>("user", "not found");
     }
 }

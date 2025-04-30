@@ -1,4 +1,4 @@
-﻿namespace TodoList.API.Services.Requests;
+﻿namespace TodoList.API.Services.Users.Contracts.Requests;
 
 public class CreateUserRequestModel
 {

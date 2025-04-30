@@ -1,9 +1,7 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using TodoList.API.Controllers.Basics;
-using TodoList.API.Services.Requests;
 using TodoList.API.Services.Users;
+using TodoList.API.Services.Users.Contracts.Requests;
 
 namespace TodoList.API.Controllers;
 

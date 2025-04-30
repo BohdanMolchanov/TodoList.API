@@ -1,14 +1,14 @@
 ﻿using TodoList.API.Models;
-using TodoList.API.Repositories.Requests;
+using TodoList.API.Services.TaskLists.Contracts.Requests;
 
 namespace TodoList.API.Repositories.TaskLists;
 
 public interface ITaskListsRepository
 {
     Task CreateTaskListAsync(TaskListModel model, CancellationToken cancellationToken);
-    Task ChangeTaskListAsync(Guid onBehalfOf, ChangeTaskListRequestModel request, CancellationToken cancellationToken);
-    Task RemoveTaskListAsync(Guid id, Guid onBehalfOf, CancellationToken cancellationToken);
-    Task<(List<TaskListModel> data, bool hasNext)> GetManyTaskListsAsync(Guid onBehalfOf, int skip, int limit, CancellationToken cancellationToken);
+    Task ChangeTaskListAsync(ChangeRequest request, CancellationToken cancellationToken);
+    Task RemoveTaskListAsync(RemoveRequest request, CancellationToken cancellationToken);
+    Task<(List<TaskListModel> data, bool hasNext)> GetManyTaskListsAsync(GetManyRequest request, CancellationToken cancellationToken);
     Task<bool> HasTaskListAccessAsync(Guid id, Guid onBehalfOf, CancellationToken cancellationToken = default);
     Task<bool> HasTaskListOwnerAccessAsync(Guid id, Guid onBehalfOf, CancellationToken cancellationToken = default);
     Task ShareTaskListAsync(Guid id, Guid userId, CancellationToken cancellationToken);

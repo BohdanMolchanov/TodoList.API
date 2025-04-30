@@ -1,10 +1,10 @@
-﻿using TodoList.API.Models;
+using TodoList.API.Models;
 using TodoList.API.Models.ServiceResponse;
 using TodoList.API.Services.TaskLists.Contracts.Requests;
 
-namespace TodoList.API.Services.TaskLists;
+namespace TodoList.API.Managers.TaskLists;
 
-public interface ITaskListsService
+public interface ITaskListsManager
 {
     Task<ServiceResponse> CreateTaskListAsync(CreateRequest request, CancellationToken cancellationToken);
     Task<ServiceResponse> ChangeTaskListAsync(ChangeRequest request, CancellationToken cancellationToken);

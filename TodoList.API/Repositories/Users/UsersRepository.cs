@@ -17,7 +17,16 @@ public class UsersRepository(DbContextOptions<TodoListContext> contextOptions) :
     public async Task<List<UserModel>> GetUsersAsync(CancellationToken cancellationToken)
     {
         await using var context = new TodoListContext(contextOptions);
-        var result = await context.Users.ToListAsync(cancellationToken);
+        var result = await context.Users.AsNoTracking().ToListAsync(cancellationToken);
         return result.Select(u => u.ToModel()).ToList();
+    }
+
+    public async Task<UserModel?> GetOneAsync(Guid onBehalfOf, CancellationToken cancellationToken)
+    {
+        await using var context = new TodoListContext(contextOptions);
+        var entity = await context.Users.Where(x => x.Id == onBehalfOf)
+            .FirstOrDefaultAsync(cancellationToken: cancellationToken);
+
+        return entity?.ToModel();
     }
 }

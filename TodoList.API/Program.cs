@@ -2,6 +2,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 using TodoList.API.Data;
+using TodoList.API.Managers.Extensions;
 using TodoList.API.Repositories.Extensions;
 using TodoList.API.Services.Extensions;
 
@@ -14,6 +15,7 @@ builder.Configuration
 
 builder.Services.AddRepositories();
 builder.Services.AddServices();
+builder.Services.AddManagers();
 
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
