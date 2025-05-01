@@ -5,6 +5,7 @@ namespace TodoList.API.Repositories.TaskLists;
 
 public interface ITaskListsRepository
 {
+    Task<TaskListModel?> GetOneAsync(Guid id, CancellationToken cancellationToken);
     Task CreateTaskListAsync(TaskListModel model, CancellationToken cancellationToken);
     Task ChangeTaskListAsync(ChangeRequest request, CancellationToken cancellationToken);
     Task RemoveTaskListAsync(RemoveRequest request, CancellationToken cancellationToken);

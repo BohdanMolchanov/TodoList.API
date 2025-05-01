@@ -2,7 +2,6 @@
 using TodoList.API.Contracts;
 using TodoList.API.Controllers.Basics;
 using TodoList.API.Managers.TaskLists;
-using TodoList.API.Services.TaskLists;
 using TodoList.API.Services.TaskLists.Contracts.Requests;
 
 namespace TodoList.API.Controllers;
@@ -27,8 +26,7 @@ public class TaskListsController(ITaskListsManager manager) : HttpController
         }, cancellationToken));
     
     [HttpDelete("{taskListId:guid}")]
-    public async Task<IActionResult> Delete([FromBody] ChangeTaskListRequest payload,
-        [FromRoute] Guid taskListId, [FromQuery] Guid? onBehalfOf,
+    public async Task<IActionResult> Delete([FromRoute] Guid taskListId, [FromQuery] Guid? onBehalfOf,
         CancellationToken cancellationToken = default) =>
         AsActionResult(await manager.RemoveTaskListAsync(new RemoveRequest()
         {

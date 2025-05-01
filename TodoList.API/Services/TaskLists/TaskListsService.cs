@@ -7,6 +7,26 @@ namespace TodoList.API.Services.TaskLists;
 
 public class TaskListsService(ITaskListsRepository repository) : ITaskListsService
 {
+    public async Task<ServiceResponse<TaskListModel>> GetOneAsync(GetOneRequest request, CancellationToken cancellationToken)
+    {
+        var validation = new GetOneRequestValidator().Validate(request);
+        if (!validation.IsValid)
+            return new ServiceResponse<TaskListModel>(validation);
+        
+        var accessResponse = await CheckTaskListAccessAsync(request.TaskListId!.Value, request.OnBehalfOf!.Value, cancellationToken);
+        if (!accessResponse.IsSuccess)
+            return new ServiceResponse<TaskListModel>()
+            {
+                Errors = accessResponse.Errors
+            };
+        
+        var result = await repository.GetOneAsync(request.TaskListId!.Value, cancellationToken);
+        return new ServiceResponse<TaskListModel>()
+        {
+            Result = result
+        };
+    }
+
     public async Task<ServiceResponse> CreateTaskListAsync(CreateRequest request, CancellationToken cancellationToken)
     {
         var validation = new CreateRequestValidator().Validate(request);
@@ -18,7 +38,7 @@ public class TaskListsService(ITaskListsRepository repository) : ITaskListsServi
             Id = Guid.NewGuid(),
             Name = request.Name,
             CreatedAt = DateTime.UtcNow,
-            OwnerId = request.OnBehalfOf
+            OwnerId = request.OnBehalfOf!.Value
         };
         
         await repository.CreateTaskListAsync(model, cancellationToken);
@@ -50,11 +70,18 @@ public class TaskListsService(ITaskListsRepository repository) : ITaskListsServi
         if (!validation.IsValid)
             return new ServiceResponse(validation);
         
-        var accessResponse = await CheckTaskListAccessAsync(request.TaskListId!.Value, request.OnBehalfOf!.Value, cancellationToken);
-        if (!accessResponse.IsSuccess)
-            return new ServiceResponse()
+        var hasOwnerAccess = await repository.HasTaskListOwnerAccessAsync(request.TaskListId!.Value, request.OnBehalfOf!.Value, cancellationToken);
+        if(!hasOwnerAccess)
+            return new ServiceResponse<List<UserModel>>()
             {
-                Errors = accessResponse.Errors
+                Errors =
+                [
+                    new ErrorModel()
+                    {
+                        Message = "You do not have permission to remove this taskList.",
+                        Property = "taskList"
+                    }
+                ]
             };
         
         await repository.RemoveTaskListAsync(request, cancellationToken);
@@ -125,7 +152,7 @@ public class TaskListsService(ITaskListsRepository repository) : ITaskListsServi
                 Errors = accessResponse.Errors
             };
         
-        var result = await repository.GetTaskListUsersAsync(request.OnBehalfOf!.Value, cancellationToken);
+        var result = await repository.GetTaskListUsersAsync(request.TaskListId!.Value, cancellationToken);
         return new ServiceResponse<List<UserModel>>()
         {
             Result = result

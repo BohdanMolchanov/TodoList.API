@@ -4,7 +4,7 @@ using TodoList.API.Models.ServiceResponse;
 
 namespace TodoList.API.Controllers.Basics;
 
-public class HttpController : ControllerBase
+public class HttpController : Controller
 {
     protected IActionResult AsActionResult<T>(ServiceResponse<(T data, bool hasNext)> response)
     {

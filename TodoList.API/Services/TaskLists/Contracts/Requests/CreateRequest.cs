@@ -4,8 +4,8 @@ namespace TodoList.API.Services.TaskLists.Contracts.Requests;
 
 public class CreateRequest
 {
-    public required Guid OnBehalfOf { get; set; }
-    public required string Name { get; set; }
+    public Guid? OnBehalfOf { get; set; }
+    public string? Name { get; set; }
 }
 
 public class CreateRequestValidator : AbstractValidator<CreateRequest>

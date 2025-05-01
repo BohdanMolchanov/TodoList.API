@@ -9,6 +9,13 @@ namespace TodoList.API.Repositories.TaskLists;
 
 public class TaskListsRepository(DbContextOptions<TodoListContext> contextOptions) : ITaskListsRepository
 {
+    public async Task<TaskListModel?> GetOneAsync(Guid id, CancellationToken cancellationToken)
+    {
+        await using var context = new TodoListContext(contextOptions);
+        var entity = await context.TaskLists.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id, cancellationToken: cancellationToken);
+        return entity?.ToModel();
+    }
+
     public async Task CreateTaskListAsync(TaskListModel model, CancellationToken cancellationToken)
     {
         var entity = model.ToEntity();
@@ -48,6 +55,7 @@ public class TaskListsRepository(DbContextOptions<TodoListContext> contextOption
         await using var context = new TodoListContext(contextOptions);
         var entities = await context.TaskLists.AsNoTracking()
             .Where(x =>
+                !x.RemovedAt.HasValue &&
                 (x.OwnerId == request.OnBehalfOf ||
                  x.UserLinks.Any(u => u.UserId == request.OnBehalfOf)))
             .OrderByDescending(x => x.CreatedAt)

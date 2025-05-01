@@ -15,7 +15,8 @@ public class TasksRepository(DbContextOptions<TodoListContext> contextOptions) :
                 x.TaskListId == taskListId &&
                 (x.TaskList.OwnerId == onBehalfOf ||
                         x.TaskList.UserLinks.Any(u => u.UserId == onBehalfOf)))
-            .OrderByDescending(x => x.IsCompleted)
+            .OrderBy(x => x.IsCompleted)
+            .ThenByDescending(x => x.CreatedAt)
             .ToListAsync(cancellationToken: cancellationToken);
 
         return entities.Select(x => x.ToModel()).ToList();
@@ -50,5 +51,13 @@ public class TasksRepository(DbContextOptions<TodoListContext> contextOptions) :
                 cancellationToken: cancellationToken);
 
         return result > 0;
+    }
+
+    public async Task CreateTaskAsync(TaskModel model, CancellationToken cancellationToken)
+    {
+        await using var context = new TodoListContext(contextOptions);
+        var entity = model.ToEntity();
+        context.Tasks.Add(entity);
+        await context.SaveChangesAsync(cancellationToken);
     }
 }
